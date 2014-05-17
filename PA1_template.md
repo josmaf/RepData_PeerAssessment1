@@ -1,19 +1,38 @@
 # Reproducible Research: Peer Assessment 1
 
+We are going to analyse data collected from personal activity monitoring device, answerings a serie of questions.
+
+Data is stored in a dataset that includes this variables:
+
+- steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+
+- date: The date on which the measurement was taken in YYYY-MM-DD format
+
+- interval: Identifier for the 5-minute interval in which measurement was taken
+
 ## Loading and preprocessing the data
+
+We can read the data set from a comma-separated-value (CSV) file, zipped in "activity.zip" file. 
+
+Steps to get data:
+
+1. unzip data
+2. read data from CVS file
+3. Process data to replace NA values with 0. Note: we'll need original data later
+
 
 
 ```r
-# loadl library
+## loadl library
 library(lattice)
 
-# unzip data
+## unzip data
 unzip("activity.zip")
 
-# read data
+## read data
 data <- read.csv("activity.csv")
 
-# replace NA values with 0 Note: we'll need original data later
+## replace NA values with 0 Note: we'll need original data later
 datafiltered <- na.omit(data)
 ```
 
@@ -25,10 +44,10 @@ We'll make a histogram of the total number of steps taken each day:
 
 ```r
 
-# sum number of steps, grouping by days
+## sum number of steps, grouping by days
 stepsbyday <- aggregate(datafiltered$steps, by = list(datafiltered$date), sum)
 
-# change names of columns in dataframe
+## change names of columns in dataframe
 names(stepsbyday) <- c("day", "number_of_steps")
 
 hist(stepsbyday$number_of_steps, xlab = "Number of steps taken each day", main = "Number of steps taken each day")
@@ -64,19 +83,22 @@ and the average number of steps taken, averaged across all days (y-axis):
 
 
 ```r
-# calculate mean number of steps by interval
+## calculate mean number of steps by interval
 stepsinterval <- aggregate(datafiltered$steps, by = list(datafiltered$interval), 
     mean)
 
-# change names of columns in dataframe
+## change names of columns in dataframe
 names(stepsinterval) <- c("interval", "number_of_steps")
 
-# plot number of steps by interval
+## plot number of steps by interval
 plot(stepsinterval$interval, stepsinterval$number_of_steps, type = "l", xlab = "Interval", 
     ylab = "Number of steps")
 ```
 
 ![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
+
+The daily pattern shows a sharp peak of activity. Then activity quikly declines, and grow more slowly in remainder intervals. 
 
 ## Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
@@ -112,9 +134,9 @@ Devise a strategy for filling in all of the missing values in the dataset:
 
 
 ```r
-# merge with data frame containing mean number of steps
+## merge with data frame containing mean number of steps
 dataf <- merge(data, stepsinterval)
-# replace NAs with median number of steps per interval
+## replace NAs with median number of steps per interval
 dataf$steps[is.na(dataf$steps)] <- dataf$number_of_steps[is.na(dataf$steps)]
 ```
 
@@ -123,13 +145,13 @@ Then, we make a histogram of the total number of steps taken each day, using "da
 
 
 ```r
-# sum number of steps, grouping by days
+## sum number of steps, grouping by days
 newstepsbyday <- aggregate(dataf$steps, by = list(dataf$date), sum)
 
-# change names of columns in dataframe
+## change names of columns in dataframe
 names(newstepsbyday) <- c("day", "number_of_steps")
 
-# plot histogram
+## plot histogram
 hist(newstepsbyday$number_of_steps, xlab = "Number of steps taken each day", 
     main = "Number of steps taken each day after missing values were imputed")
 ```
@@ -167,18 +189,18 @@ This plot will help us to respond the question:
 
 
 ```r
-# convert to date
+## convert to date
 dataf$date <- as.Date(dataf$date)
 
-# add new column: weekend or weekday?
+## add new column: weekend or weekday?
 dataf$day <- rep("weekday", nrow(dataf))
 dataf$day[as.POSIXlt(dataf$date)$wday %in% c(6, 7)] <- "weekend"
 
-# sum steps by interval and day of week
+## sum steps by interval and day of week
 dataf <- aggregate(dataf$steps, by = list(dataf$interval, dataf$day), mean)
 names(dataf) <- c("interval", "day", "mean_number_steps")
 
-# plot graph
+## plot graph
 xyplot(mean_number_steps ~ interval | day, data = dataf, layout = c(1, 2), type = "l")
 ```
 
@@ -187,4 +209,6 @@ xyplot(mean_number_steps ~ interval | day, data = dataf, layout = c(1, 2), type 
 
 Weekdays and weekend days show different patterns.
 
+Weekdays, activity tends to concentrate in the first half of day (intervals from 500 to 1000).  
 
+But activity on weekend shows a more irregular pattern, with relevant peaks on the afternoon.
