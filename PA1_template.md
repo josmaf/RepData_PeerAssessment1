@@ -13,14 +13,14 @@ unzip("activity.zip")
 # read data
 data <- read.csv("activity.csv")
 
-# replace NA values with 0
+# replace NA values with 0 Note: we'll need original data later
 datafiltered <- na.omit(data)
 ```
 
 
 ## What is mean total number of steps taken per day?
 
-Make a histogram of the total number of steps taken each day:
+We'll make a histogram of the total number of steps taken each day:
 
 
 ```r
@@ -37,7 +37,7 @@ hist(stepsbyday$number_of_steps, xlab = "Number of steps taken each day")
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 
-Calculate and report the mean and median total number of steps taken per day:
+The mean and median total number of steps taken per day are:
 
 
 ```r
@@ -59,7 +59,7 @@ cat("Median number of steps per day: ", median(stepsbyday$number_of_steps))
 
 ## What is the average daily activity pattern?
 
-Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis)
+To gain insight into this question, we'll make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis)
 and the average number of steps taken, averaged across all days (y-axis):
 
 
@@ -107,7 +107,8 @@ cat("Total number of missing values: ", colSums(is.na(data))[1])
 
 
 Devise a strategy for filling in all of the missing values in the dataset:
-- We'll fill missing values using mean values for each interval  
+
+- Our strategy: We'll create a new dataset named "dataf", <b> replacing missing values with mean values for each interval</b> :
 
 
 ```r
@@ -117,6 +118,47 @@ dataf <- merge(data, stepsinterval)
 dataf$steps[is.na(dataf$steps)] <- dataf$number_of_steps[is.na(dataf$steps)]
 ```
 
+
+Then, we make a histogram of the total number of steps taken each day, using "dataf" dataframe:
+
+
+```r
+# sum number of steps, grouping by days
+newstepsbyday <- aggregate(dataf$steps, by = list(dataf$date), sum)
+
+# change names of columns in dataframe
+names(newstepsbyday) <- c("day", "number_of_steps")
+
+# plot histogram
+hist(newstepsbyday$number_of_steps, xlab = "Number of steps taken each day")
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+
+And finally we calculate mean and median:
+
+
+```r
+cat("Mean number of steps per day: ", mean(newstepsbyday$number_of_steps))
+```
+
+```
+## Mean number of steps per day:  10766
+```
+
+```r
+cat("Median number of steps per day: ", median(newstepsbyday$number_of_steps))
+```
+
+```
+## Median number of steps per day:  10766
+```
+
+
+The results match original (non-corrected) data.
+
+Imputing missing data doesn't change overall conclussions.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -139,7 +181,7 @@ names(dataf) <- c("interval", "day", "mean_number_steps")
 xyplot(mean_number_steps ~ interval | day, data = dataf, layout = c(1, 2), type = "l")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10.png) 
 
 
 Weekdays and weekend days show different patterns.
