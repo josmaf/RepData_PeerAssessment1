@@ -30,7 +30,8 @@ stepsbyday <- aggregate(datafiltered$steps, by=list(datafiltered$date), sum)
 # change names of columns in dataframe
 names(stepsbyday) <- c("day","number_of_steps")
 
-hist(stepsbyday$number_of_steps, xlab = "Number of steps taken each day")
+hist(stepsbyday$number_of_steps, xlab = "Number of steps taken each day",
+     main="Number of steps taken each day")
 
 ```
 
@@ -95,7 +96,8 @@ newstepsbyday <- aggregate(dataf$steps, by=list(dataf$date), sum)
 names(newstepsbyday) <- c("day","number_of_steps")
 
 # plot histogram
-hist(newstepsbyday$number_of_steps, xlab = "Number of steps taken each day")
+hist(newstepsbyday$number_of_steps, xlab = "Number of steps taken each day",
+     main="Number of steps taken each day after missing values were imputed")
 ```
 
 And finally we calculate mean and median:
