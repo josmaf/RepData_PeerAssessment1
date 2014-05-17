@@ -2,7 +2,8 @@
 
 ## Loading and preprocessing the data
 
-``` {r echo = TRUE}
+
+```r
 # loadl library
 library(lattice)
 
@@ -12,96 +13,134 @@ unzip("activity.zip")
 # read data
 data <- read.csv("activity.csv")
 
-# replace NA values with 0 
+# replace NA values with 0
 datafiltered <- na.omit(data)
-
 ```
+
 
 ## What is mean total number of steps taken per day?
 
 Make a histogram of the total number of steps taken each day:
 
-``` {r echo = TRUE}
+
+```r
 
 # sum number of steps, grouping by days
-stepsbyday <- aggregate(datafiltered$steps, by=list(datafiltered$date), sum)
+stepsbyday <- aggregate(datafiltered$steps, by = list(datafiltered$date), sum)
 
 # change names of columns in dataframe
-names(stepsbyday) <- c("day","number_of_steps")
+names(stepsbyday) <- c("day", "number_of_steps")
 
 hist(stepsbyday$number_of_steps, xlab = "Number of steps taken each day")
-
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+
 
 Calculate and report the mean and median total number of steps taken per day:
 
-``` {r echo=TRUE}
-cat("Mean number of steps per day: ",mean(stepsbyday$number_of_steps))
-cat("Median number of steps per day: ",median(stepsbyday$number_of_steps))
+
+```r
+cat("Mean number of steps per day: ", mean(stepsbyday$number_of_steps))
 ```
+
+```
+## Mean number of steps per day:  10766
+```
+
+```r
+cat("Median number of steps per day: ", median(stepsbyday$number_of_steps))
+```
+
+```
+## Median number of steps per day:  10765
+```
+
 
 ## What is the average daily activity pattern?
 
 Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis)
 and the average number of steps taken, averaged across all days (y-axis):
 
-``` {r echo = TRUE}
+
+```r
 # calculate mean number of steps by interval
-stepsinterval <- aggregate(datafiltered$steps, 
-                           by=list(datafiltered$interval), mean)
+stepsinterval <- aggregate(datafiltered$steps, by = list(datafiltered$interval), 
+    mean)
 
 # change names of columns in dataframe
-names(stepsinterval) <- c("interval","number_of_steps")
+names(stepsinterval) <- c("interval", "number_of_steps")
 
-# plot number of steps by interval 
-plot(stepsinterval$interval, stepsinterval$number_of_steps, type="l", 
-     xlab="Interval", ylab="Number of steps")
+# plot number of steps by interval
+plot(stepsinterval$interval, stepsinterval$number_of_steps, type = "l", xlab = "Interval", 
+    ylab = "Number of steps")
 ```
+
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 ## Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r echo=TRUE}
-maxinterval<- stepsinterval[max(stepsinterval$number_of_steps) == 
-                                    stepsinterval$number_of_steps,1]
+
+```r
+maxinterval <- stepsinterval[max(stepsinterval$number_of_steps) == stepsinterval$number_of_steps, 
+    1]
 cat("Interval with maximun number of steps: ", maxinterval)
 ```
+
+```
+## Interval with maximun number of steps:  835
+```
+
 
 ## Imputing missing values
 
 Calculate and report the total number of missing values in the dataset:
 
-``` {r echo=TRUE}
+
+```r
 cat("Total number of missing values: ", colSums(is.na(data))[1])
 ```
+
+```
+## Total number of missing values:  2304
+```
+
 
 Devise a strategy for filling in all of the missing values in the dataset:
 - We'll fill missing values using mean values for each interval  
 
-```{r echo=TRUE}
-# merge with data frame containing mean number of steps 
-dataf <- merge(data,stepsinterval)
+
+```r
+# merge with data frame containing mean number of steps
+dataf <- merge(data, stepsinterval)
 # replace NAs with median number of steps per interval
 dataf$steps[is.na(dataf$steps)] <- dataf$number_of_steps[is.na(dataf$steps)]
 ```
+
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 This plot will help us to respond the question:
 
-```{r echo=TRUE}
+
+```r
 # convert to date
 dataf$date <- as.Date(dataf$date)
 
-# add new column: weekend or weekday? 
-dataf$day <- rep("weekday",nrow(dataf))
-dataf$day[ as.POSIXlt(dataf$date)$wday %in% c(6,7) ] <- "weekend"
+# add new column: weekend or weekday?
+dataf$day <- rep("weekday", nrow(dataf))
+dataf$day[as.POSIXlt(dataf$date)$wday %in% c(6, 7)] <- "weekend"
 
 # sum steps by interval and day of week
-dataf <- aggregate(dataf$steps, by=list(dataf$interval, dataf$day), mean)
-names(dataf) <- c("interval","day", "mean_number_steps")
+dataf <- aggregate(dataf$steps, by = list(dataf$interval, dataf$day), mean)
+names(dataf) <- c("interval", "day", "mean_number_steps")
 
 # plot graph
-xyplot(mean_number_steps ~ interval | day, data = dataf, layout = c(1, 2),type="l")
+xyplot(mean_number_steps ~ interval | day, data = dataf, layout = c(1, 2), type = "l")
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
 
 Weekdays and weekend days show different patterns.
 
